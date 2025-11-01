@@ -1,0 +1,10 @@
+numpy
+scikit-learn
+pandas
+torch 
+torchvision 
+torchaudio
+qiskit 
+qiskit-aer
+qiskit-machine-learning 
+matplotlib

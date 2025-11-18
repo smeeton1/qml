@@ -4,6 +4,16 @@ import quantum_analysis as qu
 
 # function to generate various preformance paramiters for classical ai
 def generate_classical_results(maxEpochs, steps, tol, fileName, para, targetName):
+    '''Generates plotable result for classical Ai prediction.
+    
+    maxEpochs: The maximun number of epochs to go to.
+    steps: the size of the step to be taken to reach maxEpochs. Also the start point for the number of epochs.
+    tol: that amount to of the previous gradiant to keep.
+    fileName: file to read data in from.
+    para: names of the features.
+    targetName: name of the target data.
+    
+    returns results for plotting.'''
     trainLoader, testLoader, paramiterTrain, targetTest=cl.read_prepare_data(fileName, para, targetName)
     inputDim = paramiterTrain.shape[1] 
     results = []
@@ -24,6 +34,12 @@ def generate_classical_results(maxEpochs, steps, tol, fileName, para, targetName
 
 
 def generate_vqc_results(fileName, targetName):
+    '''Generates plotable result for VQC prediction.
+    
+    fileName: file to read data in from.
+    targetName: name of the target data.
+    
+    returns results for plotting.'''
     paramiterTrain, paramiterTest, targetTrain, targetTest = qu.qml_read_prepare_data(fileName, targetName)
     results = []
 
@@ -41,6 +57,15 @@ def generate_vqc_results(fileName, targetName):
     return results
 
 def generate_qnn_results(maxEpochs, steps, tol,fileName, targetName):
+    '''Generates plotable result for QNN prediction.
+    
+    maxEpochs: The maximun number of epochs to go to.
+    steps: the size of the step to be taken to reach maxEpochs. Also the start point for the number of epochs.
+    tol: that amount to of the previous gradiant to keep.
+    fileName: file to read data in from.
+    targetName: name of the target data.
+    
+    returns results for plotting.'''
     paramiterTrain, paramiterTest, targetTrain, targetTest = qu.qml_read_prepare_data(fileName, targetName)
     inputDim = paramiterTrain.shape[1]
     results = []

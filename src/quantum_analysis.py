@@ -19,6 +19,12 @@ from scipy.optimize import minimize
 
 # Read in the data and formats for qml.
 def qml_read_prepare_data(fileName, targetName):
+    '''Read in the data and formats for qml.
+    
+    fileName: file to read data in from.
+    targetName: name of target data.
+    
+    returns Training data, testing data, training targets, testing targets'''
     data = pd.read_csv(fileName)
     labelEncoders = {}
 
@@ -39,6 +45,13 @@ def qml_read_prepare_data(fileName, targetName):
 
 # Make a vqc model
 def create_vqc(features, rep, toler):
+    '''Make a vqc model.
+    
+    features: number features for the data.
+    rep: number of time to repeate the curcuit.
+    toler: the error tolerance at which the stops
+    
+    returns vqc model.'''
     featureMap = ZZFeatureMap(feature_dimension=features, reps=rep)
     ansatz = RealAmplitudes(num_qubits=features, reps=rep)
 
@@ -54,6 +67,13 @@ def create_vqc(features, rep, toler):
 
 # Runs test for vqc method.
 def test_vqc(vqc, paramiterTest, targetTest):
+    '''Test a vqc model.
+    
+    vqc: trained vqc model.
+    paramiterTest: the test data.
+    targetTest: the test targets for test data.
+    
+    returns the accuracy, precision, recall, f1, and auc'''
     targetPred = vqc.predict(paramiterTest)
     accuracy = accuracy_score(targetTest, targetPred)
     precision = precision_score(targetTest, targetPred)
@@ -72,6 +92,12 @@ def test_vqc(vqc, paramiterTest, targetTest):
 
 # Creates a qnn circuit.
 def create_qnn(features, rep):
+    '''Sets up the curcuit for a QNN curcuit.
+    
+    features: number features for the data.
+    rep: number of time to repeate the curcuit.
+    
+    returns qnn curcuit.'''
     featureMap = ZZFeatureMap(feature_dimension=features, reps=rep, entanglement='linear')
     ansatz = RealAmplitudes(num_qubits=features, reps=rep)
     qc = QuantumCircuit(features)
@@ -87,9 +113,12 @@ def create_qnn(features, rep):
 
 # A hybrid quantm classical method. Used pyTorch and qnn
 class HybridModel(nn.Module):
-    def __init__(self, qnn_module):
+    '''Class for hybrid pytorch QNN model.
+    
+    qnnModule: the qnn curcuit to be used.'''
+    def __init__(self, qnnModule):
         super().__init__()
-        self.qnn = qnn_module
+        self.qnn = qnnModule
 
     def forward(self, x):
         out = (self.qnn(x) + 1) / 2
@@ -98,6 +127,11 @@ class HybridModel(nn.Module):
 
 # Creates the hybrid model for a qnn 
 def creat_pytorch_qnn(qnn):
+    '''Creates a hybrid pytorch QNN model
+    
+    qnn: QNN curcuit to be used.
+    
+    returns untrained model.'''
     torch_qnn = TorchConnector(qnn)
     model = HybridModel(torch_qnn)
     return model
@@ -105,6 +139,15 @@ def creat_pytorch_qnn(qnn):
 
 # Trains the hybrid model.
 def train_qnn(model, paramiterTrain, targetTrain, epochs, tol):
+    '''Trains the hybrid QNN model.
+
+    model:       model to be trained.
+    paramiterTrain: the data to train the model with.
+    targetTrain: Targets for training data.
+    epochs: the number of training runs to preforms.
+    tol: that amount to of the previous gradiant to keep.
+    
+    returns a trained model.'''
     criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=tol)
     paramiterTrainNorm = np.pi * paramiterTrain / np.max(paramiterTrain)
@@ -124,6 +167,13 @@ def train_qnn(model, paramiterTrain, targetTrain, epochs, tol):
 
 # Test the hybrid model.
 def test_qnn(model, paramiterTest, targetTest):
+    '''Test a trained QNN model.
+    
+    model: trained QNN model.
+    paramiterTest: the test data.
+    targetTest: the test targets for test data.
+    
+    returns the accuracy, precision, recall, f1, and auc'''
     paramiterTestNorm = np.pi * paramiterTest / np.max(paramiterTest)
     paramiterTestTor = torch.tensor(paramiterTestNorm, dtype=torch.float32)
     targetTestTor = torch.tensor(targetTest, dtype=torch.float32).view(-1, 1)

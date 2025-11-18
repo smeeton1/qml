@@ -10,6 +10,10 @@ from torch.utils.data import DataLoader, TensorDataset
 
 # Class for a simple nn model with two internal layers.
 class MediNN(nn.Module):
+    '''Class to set up a pytorch model with two hidden layers.
+        
+        input_dim: number of parameters for the data.
+    '''
     def __init__(self, input_dim):
         super(MediNN, self).__init__()
         self.fc1 = nn.Linear(input_dim, 64)  
@@ -27,6 +31,14 @@ class MediNN(nn.Module):
 
 # Read in data file and prepare the data for training. Returns Training set and Testing set.
 def read_prepare_data(fileName, para, targetName):
+    '''Prepares data for training and testing.
+    
+    fileName: the file containing the data.
+    para: the names of the features.
+    targetName: name of the target column.
+    
+    returns the training data, the test data, the traing data with out the target, and test target data.
+    '''
     data = pd.read_csv(fileName)
     encoder = OneHotEncoder(handle_unknown='ignore',sparse_output=False)
     encodedFeatures = encoder.fit_transform(data[para])
@@ -46,6 +58,16 @@ def read_prepare_data(fileName, para, targetName):
 
 # Train classical model. epochs is the number of training epochs. Returns the trained model
 def train_model(model, trainLoader, epochs, tol):
+    '''Train a pytorch ai model.
+    
+    model:       model to be trained.
+    trainLoader: the data to train the model with.
+    epochs: the number of training runs to preforms.
+    tol: that amount to of the previous gradiant to keep.
+    
+    returns a trained model.
+    '''
+    
     criterion = nn.CrossEntropyLoss()  
     optimizer = optim.Adam(model.parameters(), lr=tol)
 
@@ -68,7 +90,17 @@ def train_model(model, trainLoader, epochs, tol):
 
 
 # Test the model. Returns the accuracy.
-def test_model(model, testLoader, targetTest):
+def test_model(model, testLoader, testTarget):
+    '''Test a trained model.
+
+model:      model to test
+testLoader: Data to use for testing
+testTarget: The results for the test data.
+
+returns the accuracy, precision, recall, f1, and auc
+    '''
+
+
     model.eval()  
     targetPred = []
     targetTrue = []
@@ -81,7 +113,7 @@ def test_model(model, testLoader, targetTest):
             targetTrue.extend(targets.cpu().numpy()) 
 
     
-    targetTrue = targetTest.numpy()
+    targetTrue = testTarget.numpy()
 
     accuracy = accuracy_score(targetTrue, targetPred)
     precision = precision_score(targetTrue, targetPred)

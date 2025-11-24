@@ -110,7 +110,7 @@ def anomaly_detection(model, dataTensor, dfViz):
     returns a plot and the outliers.'''
     with torch.no_grad():
         reconstructions = model(dataTensor)
-        reconstruction_error = torch.mean((reconstructions - datatensor) ** 2, dim=1).numpy()
+        reconstruction_error = torch.mean((reconstructions - dataTensor) ** 2, dim=1).numpy()
     # Define a threshold for anomaly (e.g., top 10% as outliers)
     threshold = np.percentile(reconstruction_error, 90)
     # Find anomalies (outliers) based on reconstruction error

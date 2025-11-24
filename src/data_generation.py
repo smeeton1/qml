@@ -12,7 +12,7 @@ def data_generation_10(nRows, fraudRatio, printToFile = False):
     fraudRatio: the anount of the data to be generated to have a positive fraud result.
     printToFile: if True prints data to file fraud_detection_data.csv
     
-    returns generated data'''
+    returns generated data, feature names and target.'''
 
 # Generate features
     transactionAmount = np.random.exponential(scale=100, size=nRows).round(2)
@@ -27,6 +27,16 @@ def data_generation_10(nRows, fraudRatio, printToFile = False):
     timeOfDay = np.random.choice(['morning', 'afternoon', 'evening', 'night'], size=nRows)
 
 # Create DataFrame
+    features = ['transaction_amount',
+                'customer_age',
+                'transaction_type',
+                'device_type',
+                'account_balance',
+                'num_prev_transactions',
+                'country',
+                'is_foreign_transaction',
+                'merchant_risk_score',
+                'time_of_day']
     dataFraud = pd.DataFrame({
         'transaction_amount': transactionAmount,
         'customer_age': customerAge,
@@ -56,7 +66,7 @@ def data_generation_10(nRows, fraudRatio, printToFile = False):
 # Save to CSV
     if printToFile:
         dataFraud.to_csv("fraud_detection_data.csv", index=False)
-    return  dataFraud
+    return  dataFraud, features, 'is_fraud'
 
 
 
@@ -68,7 +78,7 @@ def data_generation_5(nRows, fraudRatio, printToFile = False):
     fraudRatio: the anount of the data to be generated to have a positive fraud result.
     printToFile: if True prints data to file fraud_detection_data.csv
     
-    returns generated data'''
+    returns generated data, feature names and target.'''
 
 
 # Generate features
@@ -79,6 +89,11 @@ def data_generation_5(nRows, fraudRatio, printToFile = False):
     timeOfDay = np.random.choice(['morning', 'afternoon', 'evening', 'night'], size=nRows)
 
 # Create DataFrame
+    features = ['transaction_amount',
+                'transaction_type',
+                'account_balance',
+                'merchant_risk_score',
+                'time_of_day']
     dataFraud = pd.DataFrame({
         'transaction_amount': transactionAmount,
         'transaction_type': transactionType,
@@ -102,4 +117,4 @@ def data_generation_5(nRows, fraudRatio, printToFile = False):
 # Save to CSV
     if printToFile:
         dataFraud.to_csv("fraud_detection_data.csv", index=False)
-    return  dataFraud
+    return  dataFraud, features, 'is_fraud'

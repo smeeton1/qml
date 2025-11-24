@@ -81,23 +81,27 @@ def pattern_discover(model, dataTensor):
     '''Function to find patterns in model. Returns a plot of the clustering.
     
     model: trained model
-    dataTensor: data to be classified'''
+    dataTensor: data to be classified
+    
+    returns a plot and vizulization data.'''
     with torch.no_grad():
         latent_features = model.encoder(dataTensor).numpy()
 
     # Visualize the latent space (2D)
-    df_viz = pd.DataFrame(latent_features, columns=["z1", "z2"])
+    dfViz = pd.DataFrame(latent_features, columns=["z1", "z2"])
 
     # Plot the latent features
     plt.figure(figsize=(8, 5))
-    sns.scatterplot(data=df_viz, x="z1", y="z2", s=60)
+    sns.scatterplot(data=dfViz, x="z1", y="z2", s=60)
     plt.title("Latent Space Exploration (Autoencoder)")
     plt.savefig("Latent Space Exploration (Autoencoder)")
     plt.show()
     plt.close()
 
+    return dfViz
 
-def anomaly_detection(model, dataTensor):
+
+def anomaly_detection(model, dataTensor, dfViz):
     '''Calculates the error of the model.
      
     model: trained model.
@@ -111,12 +115,12 @@ def anomaly_detection(model, dataTensor):
     threshold = np.percentile(reconstruction_error, 90)
     # Find anomalies (outliers) based on reconstruction error
     outliers = np.where(reconstruction_error > threshold)[0]
-    df_viz["Reconstruction Error"] = reconstruction_error
-    df_viz["Anomaly"] = df_viz["Reconstruction Error"] > threshold
+    dfViz["Reconstruction Error"] = reconstruction_error
+    dfViz["Anomaly"] = dfViz["Reconstruction Error"] > threshold
 
     # Plot anomalies
     plt.figure(figsize=(8, 5))
-    sns.scatterplot(data=df_viz, x="z1", y="z2", hue="Anomaly", palette={True: 'red', False: 'blue'}, s=60)
+    sns.scatterplot(data=dfViz, x="z1", y="z2", hue="Anomaly", palette={True: 'red', False: 'blue'}, s=60)
     plt.title("Latent Space with Anomalies Highlighted")
     plt.savefig("Latent Space with Anomalies Highlighted")
     plt.show()

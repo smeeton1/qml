@@ -1,27 +1,71 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import numpy as np
 
 
-def prepare_data_cluster_cl(data, features):
+def prepare_data_preserve_columns(data, features):
+    '''Prepares data for classiacl Ai clustering and preserves the number of columns.
+
+    data: the data to be prepared. Needs to be in pandas data frame format
+    feature: list of string containing the names of the features for the data
+    
+    returns a pytorch tensor.'''
+    df = data[features].copy()
+
+    # Detect column types automatically
+    categorical_features = df.select_dtypes(include=['object', 'category']).columns
+
+    # Apply ordinal encoding (in-place)
+    if len(categorical_features) > 0:
+        encoder = OrdinalEncoder()
+        df[categorical_features] = encoder.fit_transform(df[categorical_features])
+
+    # Scale all features
+    scaler = StandardScaler()
+    scaled = scaler.fit_transform(df)
+
+    # Convert to tensor
+    tensor = torch.tensor(scaled, dtype=torch.float32)
+
+    return tensor
+
+def prepare_data_cluster_cl(data, features, target):
     '''Prepares data for classiacl Ai clustering.
 
     data: the data to be prepared. Needs to be in pandas data frame format
     feature: list of string containing the names of the features for the data
     
     returns a pytorch tensor.'''
-    encoder = OneHotEncoder(handle_unknown='ignore',sparse_output=False)
-    encodedFeatures = encoder.fit_transform(data[features])
-    # Convert to DataFrame
-    encodedData = pd.DataFrame(encodedFeatures, columns=encoder.get_feature_names_out(features))
+    df = data[features]
+
+    # Automatically detect types
+    categorical_features = df.select_dtypes(include=['object', 'category']).columns
+    numerical_features = df.select_dtypes(include=['number']).columns
+
+    # Encode categorical features
+    encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
+    encoded_cat = encoder.fit_transform(df[categorical_features])
+
+    encoded_cat_df = pd.DataFrame(
+        encoded_cat,
+        columns=encoder.get_feature_names_out(),
+        index=df.index
+    )
+
+    # Keep numerical features
+    numerical_df = df[numerical_features]
+
+    # Combine both
+    final_df = pd.concat([numerical_df, encoded_cat_df], axis=1)
+
     # Standardizing data (important for model performance)
     scaler = StandardScaler()
-    dataScaled = scaler.fit_transform(encodedData)
+    dataScaled = scaler.fit_transform(final_df)
     # Convert to PyTorch tensor
     dataTensor = torch.tensor(dataScaled, dtype=torch.float32)
     return dataTensor
